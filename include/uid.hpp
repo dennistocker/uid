@@ -24,7 +24,11 @@ public:
 
     /******************* Manage Interface ***********************/
 
+    ACTION setreg(name reg);
+
     ACTION setcaller(name caller);
+
+    ACTION setmanager(name manager);
 
     ACTION setfee(name fee);
 
@@ -105,6 +109,9 @@ public:
     ACTION charge(name username, name contract, asset quantity, string memo,
             uint32_t expire_time, signature sig);
 
+    ACTION pushaction(name username, name contract, name action, string args,
+            uint32_t expire_time, signature sig);
+
     // defer
     ACTION rmchargehash(name username, name contract, uint32_t hash);
 
@@ -124,12 +131,14 @@ public:
         uint64_t dev_num = 0;
         uint64_t app_num = 0;
         uint64_t created_num = 0;
+        name reg;
         name caller;
+        name manager;
         name fee;
 
         uint64_t primary_key() const { return id; }
 
-        EOSLIB_SERIALIZE(global_info, (id)(user_num)(dev_num)(app_num)(created_num)(caller)(fee))
+        EOSLIB_SERIALIZE(global_info, (id)(user_num)(dev_num)(app_num)(created_num)(reg)(caller)(manager)(fee))
     };
 
     TABLE stats_info {
@@ -162,6 +171,7 @@ public:
     TABLE developer_info {
         name developer;
         asset balance;
+        uint32_t status = 0; // 0: normal, 1: quited
         string name; // 32 bytes
         string avatar; // 128 bytes
         string url; // 128 bytes
@@ -170,7 +180,7 @@ public:
         uint64_t primary_key() const { return developer.value; }
         uint64_t by_balance_desc() const { return -balance.amount; }
 
-        EOSLIB_SERIALIZE(developer_info, (developer)(balance)(name)(avatar)(url)(brief))
+        EOSLIB_SERIALIZE(developer_info, (developer)(balance)(status)(name)(avatar)(url)(brief))
     };
 
     TABLE dapp_info {

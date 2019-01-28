@@ -19,15 +19,19 @@
 
 ### 认证服务器
 
-认证服务器主要为DApp提供用户授权功能，接入地址为：https://test.uid.red/auth ,认证流程如下：
+认证服务器主要为DApp提供用户授权功能，接入地址为：https://bosuid.com/auth ,认证流程如下：
 
 1. 用户在DApp网站点击“登录”按钮，DApp网站将用户重定向到认证服务器，在参数中传递如下信息：
 	* client_id: 需要授权的开发者账户。开发者账户必须事先在柚ID合约中进行注册。
 	* redirect_uri: 用户授权后，授权结果的回调地址。
-	* scope: 授权范围列表，如有多个使用"^"连接，包含币种、额度等信息，格式如下：“1.0000 BOS^1.0000 EOS” (目前只支持BOS币种)
-	* expire_in: 授权的过期时间，单位为秒，可省略，默认为24小时。
+	* scope: 授权范围列表，如有多个使用"^"连接，包含币种、额度等信息，格式如下：“1.0000 BOS^1.0000 UID”
+	* expire_in: 授权的过期时间，单位为秒，可省略，默认为1小时，最大为1小时。
 	* pubkey: 交易公钥。请求授权时，前端生成一对密钥，公钥传给授权服务器，私钥用作后续扣费时的凭证。
 	* state: 客户端的当前状态，可选项，可指定任意值，认证服务器将该值原样返回。
+    * langeuage: 使用语言, 默认中文
+        * cn
+        * en
+
 2. 用户在认证服务器的网页中输入用户名、密码，确认授权信息后，点击“登录”按钮。认证服务器在执行完登录流程后跳转到步骤1中提供的redirect_uri，在url中携带授权结果。
 	* 成功: redirect_uri#error=0&username=xxx&scope=xxx&state=xxx&ulimited=false
 	* 失败: redirect_url#error=access_denied
@@ -81,7 +85,7 @@
 
 	withdraw(name account, asset quantity, string memo)
 
-开发者提取押金，如果提取后数量小于最小押金，则会提取失败。该接口只能由开发者账户调用。
+开发者提取押金，如果提取后数量小于最小押金，则会提取失败。目前该接口只能由UID合约账户调用。
 
 * account: 开发者账户
 * quantity: 要提取的押金的数量
@@ -103,7 +107,7 @@
 
 	devquit(name account, string memo)
 
-开发者退出，退还全部押金。该接口只能由开发者账户调用。
+开发者退出，退还全部押金。目前接口只能由UID合约账户调用，如要退出请发送邮件进行申请。
 
 * account: 开发者账户
 * memo: 自定义memo
@@ -175,7 +179,7 @@ DApp退出，该接口只能由DApp合约账户或该DApp所属的开发者账�
 
 	charge(name username, name contract, asset quantity, string memo, uint32_t expire_time, signature sig)
 
-DApp通过用户授权的私钥进行扣款，柚ID合约校验通过后，调用tranfer接口向DApp合约账户进行转账。
+DApp通过用户授权的私钥进行扣款，柚ID合约校验通过后，调用tranfer接口向DApp合约账户进行转账。接口需使用账户`uidfreetouse`的`uid`权限进行调用, 对应的私钥为`5JzUD1J4fpPTm1c7fCRfQHbWGEeKsypwAqEwweU2wm7vRCJzTFj`。
 
 * username: 要扣款的用户名
 * contract: DApp合约账户
@@ -183,8 +187,6 @@ DApp通过用户授权的私钥进行扣款，柚ID合约校验通过后，调�
 * expire_time: 交易超时时间，距1970年1月1日0时的秒数，需在当前时间180s以内。
 * memo: transfer接口需要的memo信息（**DApp需要将username放入memo以识别具体账户**）
 * sig: 将除sig外其余参数转成字符串，以"-"连接，然后使用交易私钥进行签名。
-
-**charge 接口不验证调用者权限，只验证签名是否有效，开发者需妥善保存用户授权后的交易私钥。**
 
 ### 管理系统
 
@@ -278,4 +280,9 @@ DApp通过用户授权的私钥进行扣款，柚ID合约校验通过后，调�
 2. 修改DApp合约以支持柚ID系统
 	* 修改转账接口，向用户转账时修改为向柚ID合约转账，在memo中标识具体用户
 	* 接收转账时，从memo中判断具体转账用户
+	* 如有其它与用户交互的接口，与转账接口类似，需要从memo中标识具体用户
 3. 修改DApp前端，支持柚ID系统。
+4. 目前如需提取押金或退出，请发送邮件至uid@boscore.io进行申请，邮件中请包含以下内容
+	* 开发者账户
+	* 申请类型：“提取押金”或“退出”
+	* 如申请提取押金，需注明要提取的数量。

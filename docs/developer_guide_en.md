@@ -1,4 +1,4 @@
-# UID developer Guide
+# UID Developer Guide
 
 ## Purpose
 
@@ -19,16 +19,16 @@ UID system mainly consists of three parts: authentication server, UID contract a
 
 ### Authentication Server
 
-The authentication server mainly provides the user authorization function for DApps, the access address is: https://test.uid.red/auth the authentication flow is as follows:
+The authentication server mainly provides the user authorization function for DApps, the access address is: https://bosuid.com/auth . The authentication flow is as follows:
 
 1. The user clicks the "Login" button on the DApp Web site, and the DApp Web site redirects the user to the authentication server, passing the following information in the parameters:
 	* client_id: the developer account. The developer account must be registered with the UID contract in advance.
 	* redirect_uri: the callback address of the authorization result.
-	* scope: list of authorization scopes, including currency andamount, in the following format: "1.0000 BOS ^ 1.0000 EOS" (currently only BOS is supported).
-	* expire_in: the expiration time of the authorization, in seconds, optional, defaults to 24 hours.
+	* scope: list of authorization scopes, including currency andamount, in the following format: "1.0000 BOS ^ 1.0000 UID"
+	* expire_in: the expiration time of the authorization, in seconds, optional, defaults to 1 hour, and max is 1 hour.
 	* pubkey: trades public keys. When requesting authorization, the front end generates a pair of keys, the public key is passed to the authorization server, and the private key is used for the subsequent deduction of the fee
 	* state: the current state of the client, optional, can be specified any value, the authentication server returns the value as it is.
-	* language: the language used
+	* language: the language used, default is `cn`
 		* en
 		* cn
 
@@ -96,7 +96,7 @@ The developers adds his own deposit, the memo format is: `rc^account^original_me
 withdraw(name account, asset quantity, string memo)
 ```
 
-The developer withdraws the deposit, if the quantity after after extraction is less than the minimum deposit, the withdrawal fails. Can only be called by the developer account.
+The developer withdraws the deposit, if the quantity after after extraction is less than the minimum deposit, the withdrawal fails. For now can only be called by the `UID` account.
 
 * account: developer account
 * quantity: the quantity of the deposit to be withdrawn
@@ -122,7 +122,7 @@ The developer verifies the DApp. Only the DApp that is verified by the developer
 devquit(name account, string memo)
 ```
 
-The developer quits and refunds all the deposit.Can only be called by the developer account.
+The developer quits and refunds all the deposit. For now can only be called by the `UID` account.
 
 * account: developer account
 * memo: user-defined memo
@@ -203,7 +203,7 @@ Tranferring tokens to a user in the UID system, or to a mainnet user. When Trans
 charge(name username, name contract, asset quantity, string memo, uint32_t expire_time, signature sig)
 ```
 
-The DApp deducts tokens with the private key authorized by the user. Can only be called by `boshuobinode` with the permission `uid`, the corresponding private key is `5KEk58bZuNvjvvPhnkHeCWf5ZQrvBjkNE9W9CFu17qfrwneHfxp`.
+The DApp deducts tokens with the private key authorized by the user. Can only be called by `uidfreetouse` with the permission `uid`, the corresponding private key is `5JzUD1J4fpPTm1c7fCRfQHbWGEeKsypwAqEwweU2wm`.
 
 * username: the user to be charged from
 * contract: DApp contact account
@@ -304,5 +304,10 @@ Mainly provides user management function for ordinary users.
 2. Modify to DApp contract to make it compatible with the UID contract.
 	* Modify the `transfer` interface. When transferring to a user in the UID system, transfer to `uid` and indentify the specific user in the memo.
 	* When received an transfer from `uid`, get the specific transfer user in the memo.
+	* For any other actions interact with users, same as the `transfer` interface, also need to indentifu the specific user in the memo.
 3. Modify the DApp front end to support the UID system.
+4. As a developer, if you need to withdraw or quit, please email to uid@boscore.io, and the email should include the following contents:
+	* the developer contract
+	* application type, `withdraw` or `devquit`
+	* if the application type is `withdraw`, the quantity to be withdrawn is also needed.
 
